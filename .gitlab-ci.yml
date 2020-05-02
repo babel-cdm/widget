@@ -1,0 +1,47 @@
+stages:
+  - analysis
+  - build
+  - test
+
+analysis:
+  stage: analysis
+  script:
+    - ./gradlew detekt
+  only:
+    - merge_requests
+  tags:
+    - android
+    - analysis
+
+build:
+  stage: build
+  artifacts:
+    name: "aar"
+    paths:
+      - presentation/build/outputs/aar/
+  cache:
+    paths:
+      - presentation/build/
+  script:
+    - ./gradlew --no-daemon -q assembleDebug
+  only:
+    - merge_requests
+  tags:
+    - android
+    - build
+
+test:
+  stage: test
+  artifacts:
+    name: "reports"
+    paths:
+      - presentation/build/reports/
+    when: always
+  script:
+    - ./gradlew test
+    - ./gradlew connectedAndroidTest
+  only:
+    - merge_requests
+  tags:
+    - android
+    - test
